@@ -38,7 +38,7 @@ class _ProductScreenState extends State<ProductScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Enhancement 1: Add search bar above the article list.
+            // Add search bar above the article list.
             TextField(
               onChanged: (value) {
                 setState(() {
@@ -51,7 +51,10 @@ class _ProductScreenState extends State<ProductScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
                 ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16.w,
+                  vertical: 12.h,
+                ),
               ),
             ),
             SizedBox(height: 16.h),
@@ -77,7 +80,13 @@ class _ProductScreenState extends State<ProductScreen> {
                 }
 
                 final products = snapshot.data ?? [];
-                final filteredProducts = products.where((p) => p.title.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
+                final filteredProducts = products
+                    .where(
+                      (p) => p.title.toLowerCase().contains(
+                        _searchQuery.toLowerCase(),
+                      ),
+                    )
+                    .toList();
 
                 if (filteredProducts.isEmpty) {
                   return Center(
@@ -100,13 +109,14 @@ class _ProductScreenState extends State<ProductScreen> {
                   ),
                   itemBuilder: (context, index) {
                     final product = filteredProducts[index];
-                    // Enhancement 2: Add details page when clicked the card.
+                    //Add details page when clicked the card.
                     return InkWell(
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ProductDetailsScreen(product: product),
+                            builder: (context) =>
+                                ProductDetailsScreen(product: product),
                           ),
                         );
                       },
@@ -142,7 +152,8 @@ class _ProductScreenState extends State<ProductScreen> {
                                   ),
                                   SizedBox(height: 4.h),
                                   CustomText(
-                                    text: '\$${product.price.toStringAsFixed(2)}',
+                                    text:
+                                        '\$${product.price.toStringAsFixed(2)}',
                                     fontSize: 13.sp,
                                     fontWeight: FontWeight.w600,
                                   ),

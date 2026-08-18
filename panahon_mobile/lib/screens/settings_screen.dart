@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
 
-// Enhancement 3: Add settings page to move the dark/light mode switch.
+// Add settings page to move the dark/light mode switch.
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
@@ -11,9 +11,7 @@ class SettingsScreen extends StatelessWidget {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
+      appBar: AppBar(title: const Text('Settings')),
       body: ListView(
         children: [
           SwitchListTile(

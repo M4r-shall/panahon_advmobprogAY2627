@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'product_screen.dart';
+import 'cart_screen.dart';
 
 import '../widgets/custom_text.dart';
 
@@ -24,22 +25,23 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          elevation: 2,
+          elevation: (_selectedIndex == 1) ? 0 : 2,
+          backgroundColor: (_selectedIndex == 1) ? const Color(0xFF3B4A93) : null,
           title: (_selectedIndex == 0)
-              ? Image.asset('assets/images/nubdexchange_logo.png' , scale: 11.sp,)
+              ? Image.asset('assets/images/nubdexchange_logo.png', scale: 11.sp)
               : CustomText(
                   text: (_selectedIndex == 1)
-                      ? 'Chat'
+                      ? 'Cart'
                       : (_selectedIndex == 2)
-                          ? 'Profile'
-                          : 'Home',
+                      ? 'Profile'
+                      : 'Home',
                   fontSize: 20.sp,
-                  // color: FB_LIGHT_PRIMARY,
                   fontWeight: FontWeight.w600,
+                  color: (_selectedIndex == 1) ? Colors.white : null,
                 ),
           actions: [
             IconButton(
-              icon: Icon(Icons.settings, size: 24.sp),
+              icon: Icon(Icons.settings, size: 24.sp, color: (_selectedIndex == 1) ? Colors.white : null),
               onPressed: () => Navigator.pushNamed(context, '/settings'),
             ),
           ],
@@ -47,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
         body: PageView(
           physics: const NeverScrollableScrollPhysics(),
           controller: _pageController,
-          children: const <Widget>[ProductScreen()],
+          children: const <Widget>[ProductScreen(), CartScreen()],
           onPageChanged: (page) {
             setState(() {
               _selectedIndex = page;
@@ -55,16 +57,25 @@ class _HomeScreenState extends State<HomeScreen> {
           },
         ),
         bottomNavigationBar: BottomNavigationBar(
-          showSelectedLabels: false, //selected item
-          showUnselectedLabels: false, //unselected item
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
           onTap: _onTappedBar,
           items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.shop_2), label: 'Shop'),
-            BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
+            BottomNavigationBarItem(icon: Icon(Icons.shopping_bag), label: 'Shop'),
+            BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Cart'),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
           ],
           currentIndex: _selectedIndex,
         ),
+        // Enhancement 2: Make the chat bottom navigation as FloatingActionButton.
+        // When in the cart_screen the FloatingActionButton must be hidden.
+        floatingActionButton: _selectedIndex != 1
+            ? FloatingActionButton(
+                onPressed: () {},
+                backgroundColor: Colors.amber[400],
+                child: const Icon(Icons.chat, color: Colors.black87),
+              )
+            : null,
       ),
     );
   }

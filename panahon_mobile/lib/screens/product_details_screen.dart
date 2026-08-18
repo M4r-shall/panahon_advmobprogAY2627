@@ -3,7 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/product_model.dart';
 import '../widgets/custom_text.dart';
 
-// Enhancement 2: Add details page when clicked the card.
+import '../services/cart_service.dart';
+
+//Add details page when clicked the card.
 class ProductDetailsScreen extends StatelessWidget {
   final Product product;
 
@@ -61,14 +63,50 @@ class ProductDetailsScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 10.h),
                   CustomText(
-                    text: 'Brand: ${product.brand.isNotEmpty ? product.brand : "Unknown"}',
+                    text:
+                        'Brand: ${product.brand.isNotEmpty ? product.brand : "Unknown"}',
                     fontSize: 14.sp,
                   ),
                   SizedBox(height: 5.h),
-                  CustomText(
-                    text: 'Stock: ${product.stock}',
-                    fontSize: 14.sp,
+                  CustomText(text: 'Stock: ${product.stock}', fontSize: 14.sp),
+                  SizedBox(height: 40.h),
+                  // Enhancement 3: Use add to cart by passing the values of the product => cart
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.amber,
+                        padding: EdgeInsets.symmetric(vertical: 16.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                      ),
+                      onPressed: () async {
+                        try {
+                          final cartService = CartService();
+                          await cartService.addToCart(33, product.id, 1);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('${product.title} added to cart!')),
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Failed to add to cart: $e')),
+                            );
+                          }
+                        }
+                      },
+                      child: CustomText(
+                        text: 'Add to Cart',
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
                   ),
+                  SizedBox(height: 20.h),
                 ],
               ),
             ),
