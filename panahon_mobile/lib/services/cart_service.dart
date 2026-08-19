@@ -16,7 +16,6 @@ class CartService {
     }
   }
 
-  // Enhancement 3: getCartByUserId to render only one user cart
   Future<Cart> getCartByUserId(int userId) async {
     final response = await http.get(Uri.parse('$host/carts/user/$userId'));
 
@@ -33,7 +32,6 @@ class CartService {
     }
   }
 
-  // Enhancement 3: addToCart to pass values of product => cart
   Future<Cart> addToCart(int userId, int productId, int quantity) async {
     final response = await http.post(
       Uri.parse('$host/carts/add'),
@@ -43,11 +41,8 @@ class CartService {
       body: jsonEncode(<String, dynamic>{
         'userId': userId,
         'products': [
-          {
-            'id': productId,
-            'quantity': quantity,
-          }
-        ]
+          {'id': productId, 'quantity': quantity},
+        ],
       }),
     );
 

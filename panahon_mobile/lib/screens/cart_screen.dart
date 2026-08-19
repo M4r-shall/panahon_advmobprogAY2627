@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/cart.dart';
 import '../services/cart_service.dart';
 import '../services/product_service.dart';
+import '../services/user_service.dart';
 import 'product_details_screen.dart';
 import '../widgets/custom_text.dart';
 
@@ -17,13 +18,20 @@ class CartScreen extends StatefulWidget {
 class _CartScreenState extends State<CartScreen> {
   final CartService _cartService = CartService();
   final ProductService _productService = ProductService();
+  final UserService _userService = UserService();
   late Future<Cart> _cartFuture;
 
   @override
   void initState() {
     super.initState();
-    // Fetch Cart by User ID
-    _cartFuture = _cartService.getCartByUserId(1);
+    // Enhancement 3: Based on the saved user data render the cart by userId
+    _cartFuture = _initCart();
+  }
+
+  Future<Cart> _initCart() async {
+    final user = await _userService.getUser();
+    final userId = user.id > 0 ? user.id : 1;
+    return _cartService.getCartByUserId(userId);
   }
 
   void _navigateToDetails(int productId) async {

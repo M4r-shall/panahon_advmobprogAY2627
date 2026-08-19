@@ -1,4 +1,3 @@
-// Enhancement 1, 3: Cart and CartProduct models created for Cart endpoint integration.
 class Cart {
   final int id;
   final List<CartProduct> products;
@@ -21,7 +20,8 @@ class Cart {
   factory Cart.fromJson(Map<String, dynamic> json) {
     return Cart(
       id: json['id'] ?? 0,
-      products: (json['products'] as List?)
+      products:
+          (json['products'] as List?)
               ?.map((e) => CartProduct.fromJson(e))
               .toList() ??
           [],

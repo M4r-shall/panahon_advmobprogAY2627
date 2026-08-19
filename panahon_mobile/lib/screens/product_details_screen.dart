@@ -70,7 +70,7 @@ class ProductDetailsScreen extends StatelessWidget {
                   SizedBox(height: 5.h),
                   CustomText(text: 'Stock: ${product.stock}', fontSize: 14.sp),
                   SizedBox(height: 40.h),
-                  // Enhancement 3: Use add to cart by passing the values of the product => cart
+                  //add to cart by passing the values of the product => cart
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -87,13 +87,19 @@ class ProductDetailsScreen extends StatelessWidget {
                           await cartService.addToCart(33, product.id, 1);
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('${product.title} added to cart!')),
+                              SnackBar(
+                                content: Text(
+                                  '${product.title} added to cart!',
+                                ),
+                              ),
                             );
                           }
                         } catch (e) {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Failed to add to cart: $e')),
+                              SnackBar(
+                                content: Text('Failed to add to cart: $e'),
+                              ),
                             );
                           }
                         }
