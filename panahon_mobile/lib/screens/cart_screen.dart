@@ -93,11 +93,11 @@ class _CartScreenState extends State<CartScreen> {
                         margin: EdgeInsets.only(bottom: 16.h),
                         padding: EdgeInsets.all(12.w),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).cardColor,
                           borderRadius: BorderRadius.circular(16.r),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.grey.withValues(alpha: 0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               blurRadius: 10,
                               spreadRadius: 1,
                               offset: const Offset(0, 5),
@@ -130,14 +130,14 @@ class _CartScreenState extends State<CartScreen> {
                                         '\$${product.price.toStringAsFixed(2)}',
                                     fontSize: 16.sp,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.amber,
+                                    color: Theme.of(context).colorScheme.primary,
                                   ),
                                   SizedBox(height: 4.h),
                                   CustomText(
                                     text:
                                         '${product.discountPercentage.toStringAsFixed(0)}% off • \$${product.discountedTotal.toStringAsFixed(2)} total',
                                     fontSize: 10.sp,
-                                    color: Colors.grey,
+                                    color: Theme.of(context).hintColor,
                                   ),
                                 ],
                               ),
@@ -148,13 +148,13 @@ class _CartScreenState extends State<CartScreen> {
                                   width: 28.w,
                                   height: 28.w,
                                   decoration: BoxDecoration(
-                                    color: Colors.amber,
+                                    color: Theme.of(context).colorScheme.primary,
                                     borderRadius: BorderRadius.circular(8.r),
                                   ),
                                   child: Icon(
                                     Icons.add,
                                     size: 16.sp,
-                                    color: Colors.black87,
+                                    color: Theme.of(context).colorScheme.onPrimary,
                                   ),
                                 ),
                                 Padding(
@@ -169,13 +169,13 @@ class _CartScreenState extends State<CartScreen> {
                                   width: 28.w,
                                   height: 28.w,
                                   decoration: BoxDecoration(
-                                    color: Colors.grey[200],
+                                    color: Theme.of(context).scaffoldBackgroundColor,
                                     borderRadius: BorderRadius.circular(8.r),
                                   ),
                                   child: Icon(
                                     Icons.remove,
                                     size: 16.sp,
-                                    color: Colors.black87,
+                                    color: Theme.of(context).textTheme.bodyMedium?.color,
                                   ),
                                 ),
                               ],
@@ -199,13 +199,13 @@ class _CartScreenState extends State<CartScreen> {
                               CustomText(
                                 text: 'Subtotal:',
                                 fontSize: 14.sp,
-                                color: Colors.grey,
+                                color: Theme.of(context).hintColor,
                               ),
                               CustomText(
                                 text: '\$${cart.total.toStringAsFixed(2)}',
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.amber,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                             ],
                           ),
@@ -216,13 +216,13 @@ class _CartScreenState extends State<CartScreen> {
                               CustomText(
                                 text: 'Delivery Fee:',
                                 fontSize: 14.sp,
-                                color: Colors.grey,
+                                color: Theme.of(context).hintColor,
                               ),
                               CustomText(
                                 text: '\$0.00',
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.amber,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                             ],
                           ),
@@ -236,11 +236,11 @@ class _CartScreenState extends State<CartScreen> {
             Container(
               padding: EdgeInsets.all(24.w),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 10,
                     offset: const Offset(0, -5),
                   ),
@@ -252,7 +252,7 @@ class _CartScreenState extends State<CartScreen> {
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
                     padding: EdgeInsets.symmetric(vertical: 16.h),
-                    backgroundColor: Colors.amber,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.r),
                     ),
@@ -264,7 +264,7 @@ class _CartScreenState extends State<CartScreen> {
                     text: 'Confirm Order',
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: Theme.of(context).colorScheme.onPrimary,
                   ),
                 ),
               ),

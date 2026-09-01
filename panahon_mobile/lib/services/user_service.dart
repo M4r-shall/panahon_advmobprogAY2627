@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../constants.dart';
 import '../models/user.dart';
 
-// Enhancement 2 & 3: Created UserService to handle API calls and SharedPreferences.
+//Created UserService to handle API calls and SharedPreferences.
 class UserService {
   Map<String, dynamic> data = {};
 
@@ -28,7 +28,7 @@ class UserService {
     }
   }
 
-  /// **Save User Data to SharedPreferences**
+  /// Save User Data to SharedPreferences
   /// Save user data from API response based on User model
   Future<void> saveUserData(Map<String, dynamic> userData) async {
     final prefs = await SharedPreferences.getInstance();
@@ -76,14 +76,14 @@ class UserService {
     return User.fromJson(userData);
   }
 
-  /// **Check if User is Logged In**
+  /// Check if User is Logged In
   Future<bool> isLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('accessToken') ?? prefs.getString('token');
     return token != null && token.isNotEmpty;
   }
 
-  /// **Logout and Clear User Data**
+  /// Logout and Clear User Data
   Future<void> logout() async {
     try {
       final prefs = await SharedPreferences.getInstance();

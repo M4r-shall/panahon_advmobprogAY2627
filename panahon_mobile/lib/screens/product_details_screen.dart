@@ -75,8 +75,9 @@ class ProductDetailsScreen extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.amber,
+                        elevation: 0,
                         padding: EdgeInsets.symmetric(vertical: 16.h),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.r),
                         ),
@@ -108,7 +109,7 @@ class ProductDetailsScreen extends StatelessWidget {
                         text: 'Add to Cart',
                         fontSize: 16.sp,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     ),
                   ),

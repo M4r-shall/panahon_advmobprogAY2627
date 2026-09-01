@@ -64,7 +64,7 @@ class _SigninScreenState extends State<SigninScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1E202C),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 40.h),
@@ -83,31 +83,34 @@ class _SigninScreenState extends State<SigninScreen> {
                     ),
                     SizedBox(width: 8.w),
                     CustomText(
-                      text: 'Welcome',
-                      fontSize: 28.sp,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFFBFC0D1),
+                      text: 'Please sign in to your account',
+                      fontSize: 14.sp,
+                      color: Theme.of(context).hintColor,
                     ),
                   ],
                 ),
                 SizedBox(height: 48.h),
                 TextFormField(
                   controller: _usernameController,
-                  style: const TextStyle(color: Color(0xFFBFC0D1)),
+                  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
                   decoration: InputDecoration(
                     labelText: 'Username',
-                    labelStyle: const TextStyle(color: Color(0xFFBFC0D1)),
+                    labelStyle: TextStyle(color: Theme.of(context).hintColor),
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
                     filled: true,
-                    fillColor: const Color(0xFF31323E),
+                    fillColor: Theme.of(context).cardColor,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                      borderSide: BorderSide(color: Theme.of(context).cardColor),
+                    ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
-                      borderSide: const BorderSide(color: Color(0xFF31323E)),
+                      borderSide: BorderSide(color: Theme.of(context).cardColor),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
-                      borderSide: const BorderSide(color: Color(0xFF60519B)),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
                     ),
                     errorBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
@@ -129,21 +132,25 @@ class _SigninScreenState extends State<SigninScreen> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: true,
-                  style: const TextStyle(color: Color(0xFFBFC0D1)),
+                  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    labelStyle: const TextStyle(color: Color(0xFFBFC0D1)),
+                    labelStyle: TextStyle(color: Theme.of(context).hintColor),
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
                     filled: true,
-                    fillColor: const Color(0xFF31323E),
+                    fillColor: Theme.of(context).cardColor,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                      borderSide: BorderSide(color: Theme.of(context).cardColor),
+                    ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
-                      borderSide: const BorderSide(color: Color(0xFF31323E)),
+                      borderSide: BorderSide(color: Theme.of(context).cardColor),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
-                      borderSide: const BorderSide(color: Color(0xFF60519B)),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
                     ),
                     errorBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
@@ -166,16 +173,17 @@ class _SigninScreenState extends State<SigninScreen> {
                   height: 50.h,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF60519B),
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      padding: EdgeInsets.symmetric(vertical: 16.h),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.r),
+                        borderRadius: BorderRadius.circular(12.r),
                       ),
                     ),
                     onPressed: _isLoading ? null : _login,
                     child: _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
                         : CustomText(
-                            text: 'Log In',
+                            text: 'Sign In',
                             fontSize: 16.sp,
                             fontWeight: FontWeight.bold,
                             color: const Color(0xFFBFC0D1),

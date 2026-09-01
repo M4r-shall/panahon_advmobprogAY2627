@@ -42,11 +42,12 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1E202C),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const Spacer(),
             Image.asset(
               'assets/images/nubdexchange_logo.png',
               width: 120.w,
@@ -55,15 +56,28 @@ class _SplashScreenState extends State<SplashScreen> {
             Text(
               'NUBD Exchange',
               style: TextStyle(
-                color: const Color(0xFFBFC0D1),
+                color: Theme.of(context).primaryColor,
                 fontSize: 24.sp,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(height: 40.h),
-            const CircularProgressIndicator(
-              color: Color(0xFF60519B),
+            const Spacer(),
+            CustomText(
+              text: 'from',
+              fontSize: 12.sp,
+              color: Theme.of(context).hintColor,
             ),
+            CustomText(
+              text: 'E-Commerce App',
+              fontSize: 20.sp,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            SizedBox(height: 40.h),
+            CircularProgressIndicator(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            SizedBox(height: 40.h),
           ],
         ),
       ),

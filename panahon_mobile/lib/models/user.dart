@@ -21,7 +21,7 @@ class User {
     required this.refreshToken,
   });
 
-  // Enhancement 3: Created the User model to serialize/deserialize API data.
+  //Created the User model to serialize/deserialize API data.
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] ?? 0,

@@ -27,13 +27,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return PopScope(
       canPop: false,
       child: Scaffold(
-        backgroundColor: const Color(0xFF1E202C),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           automaticallyImplyLeading: false,
           elevation: (_selectedIndex == 1) ? 0 : 2,
-          backgroundColor: (_selectedIndex == 1 || _selectedIndex == 2)
-              ? const Color(0xFF31323E)
-              : const Color(0xFF1E202C),
+          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           title: (_selectedIndex == 0)
               ? Image.asset('assets/images/nubdexchange_logo.png', scale: 11.sp)
               : CustomText(
@@ -44,14 +42,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       : 'Home',
                   fontSize: 20.sp,
                   fontWeight: FontWeight.w600,
-                  color: (_selectedIndex == 1 || _selectedIndex == 2) ? const Color(0xFFBFC0D1) : Colors.white,
+                  color: Theme.of(context).appBarTheme.foregroundColor,
                 ),
           actions: [
             IconButton(
               icon: Icon(
                 Icons.settings,
                 size: 24.sp,
-                color: (_selectedIndex == 1 || _selectedIndex == 2) ? const Color(0xFFBFC0D1) : Colors.white,
+                color: Theme.of(context).appBarTheme.iconTheme?.color,
               ),
               onPressed: () => Navigator.pushNamed(context, '/settings'),
             ),
@@ -68,9 +66,9 @@ class _HomeScreenState extends State<HomeScreen> {
           },
         ),
         bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: const Color(0xFF1E202C),
-          selectedItemColor: const Color(0xFF60519B),
-          unselectedItemColor: const Color(0xFFBFC0D1),
+          backgroundColor: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
+          selectedItemColor: Theme.of(context).bottomNavigationBarTheme.selectedItemColor,
+          unselectedItemColor: Theme.of(context).bottomNavigationBarTheme.unselectedItemColor,
           showSelectedLabels: false,
           showUnselectedLabels: false,
           onTap: _onTappedBar,
@@ -92,8 +90,8 @@ class _HomeScreenState extends State<HomeScreen> {
         floatingActionButton: _selectedIndex != 1
             ? FloatingActionButton(
                 onPressed: () {},
-                backgroundColor: const Color(0xFF60519B),
-                child: const Icon(Icons.chat, color: Color(0xFF1E202C)),
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                child: Icon(Icons.chat, color: Theme.of(context).colorScheme.onPrimary),
               )
             : null,
       ),

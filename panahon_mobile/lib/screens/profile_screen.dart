@@ -44,7 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         final user = snapshot.data!;
 
         return Container(
-          color: const Color(0xFF1E202C),
+          color: Theme.of(context).scaffoldBackgroundColor,
           child: SingleChildScrollView(
             padding: EdgeInsets.all(16.w),
             child: Column(
@@ -55,7 +55,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Container(
                   padding: EdgeInsets.symmetric(vertical: 32.h),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF31323E),
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16.r),
                     boxShadow: [
                       BoxShadow(
@@ -70,12 +70,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       CircleAvatar(
                         radius: 40.r,
-                        backgroundColor: const Color(0xFF1E202C),
+                        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                         backgroundImage: user.image.isNotEmpty
                             ? NetworkImage(user.image)
                             : null,
                         child: user.image.isEmpty
-                            ? Icon(Icons.person, size: 40.sp, color: const Color(0xFFBFC0D1))
+                            ? Icon(Icons.person, size: 40.sp, color: Theme.of(context).hintColor)
                             : null,
                       ),
                       SizedBox(height: 16.h),
@@ -83,14 +83,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         text: '${user.firstName} ${user.lastName}',
                         fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
                       ),
                       SizedBox(height: 4.h),
                       CustomText(
                         text: '@${user.username}',
                         fontSize: 14.sp,
                         fontWeight: FontWeight.bold,
-                        color: const Color(0xFF60519B),
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ],
                   ),
@@ -99,7 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 // Info Card
                 Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFF31323E),
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16.r),
                     boxShadow: [
                       BoxShadow(
@@ -112,11 +112,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   child: Column(
                     children: [
-                      _buildInfoTile(Icons.email_outlined, 'Email', user.email),
-                      const Divider(height: 1, color: Color(0xFF1E202C)),
-                      _buildInfoTile(Icons.people_alt_outlined, 'Gender', user.gender.toLowerCase()),
-                      const Divider(height: 1, color: Color(0xFF1E202C)),
-                      _buildInfoTile(Icons.badge_outlined, 'User ID', '#${user.id}'),
+                      _buildInfoTile(context, Icons.email_outlined, 'Email', user.email),
+                      Divider(height: 1, color: Theme.of(context).scaffoldBackgroundColor),
+                      _buildInfoTile(context, Icons.people_alt_outlined, 'Gender', user.gender.toLowerCase()),
+                      Divider(height: 1, color: Theme.of(context).scaffoldBackgroundColor),
+                      _buildInfoTile(context, Icons.badge_outlined, 'User ID', '#${user.id}'),
                     ],
                   ),
                 ),
@@ -126,9 +126,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   height: 50.h,
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1E202C),
-                      side: const BorderSide(color: Color(0xFF60519B), width: 1.5),
-                      foregroundColor: const Color(0xFFBFC0D1),
+                      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                      side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
+                      foregroundColor: Theme.of(context).hintColor,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.r),
@@ -140,7 +140,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       text: 'Log Out',
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFFBFC0D1),
+                      color: Theme.of(context).hintColor,
                     ),
                   ),
                 ),
@@ -152,24 +152,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildInfoTile(IconData icon, String title, String subtitle) {
+  Widget _buildInfoTile(BuildContext context, IconData icon, String title, String subtitle) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
       child: Row(
         children: [
-          Icon(icon, color: const Color(0xFF60519B), size: 20.sp),
+          Icon(icon, color: Theme.of(context).colorScheme.primary, size: 20.sp),
           SizedBox(width: 12.w),
           CustomText(
             text: title,
             fontSize: 14.sp,
             fontWeight: FontWeight.bold,
-            color: const Color(0xFFBFC0D1),
+            color: Theme.of(context).hintColor,
           ),
           const Spacer(),
           CustomText(
             text: subtitle,
             fontSize: 14.sp,
-            color: const Color(0xFFBFC0D1),
+            color: Theme.of(context).hintColor,
           ),
         ],
       ),
