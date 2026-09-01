@@ -17,6 +17,26 @@ class Cart {
     required this.totalQuantity,
   });
 
+  Cart copyWith({
+    int? id,
+    List<CartProduct>? products,
+    double? total,
+    double? discountedTotal,
+    int? userId,
+    int? totalProducts,
+    int? totalQuantity,
+  }) {
+    return Cart(
+      id: id ?? this.id,
+      products: products ?? this.products,
+      total: total ?? this.total,
+      discountedTotal: discountedTotal ?? this.discountedTotal,
+      userId: userId ?? this.userId,
+      totalProducts: totalProducts ?? this.totalProducts,
+      totalQuantity: totalQuantity ?? this.totalQuantity,
+    );
+  }
+
   factory Cart.fromJson(Map<String, dynamic> json) {
     return Cart(
       id: json['id'] ?? 0,
@@ -66,6 +86,28 @@ class CartProduct {
     required this.discountedTotal,
     required this.thumbnail,
   });
+
+  CartProduct copyWith({
+    int? id,
+    String? title,
+    double? price,
+    int? quantity,
+    double? total,
+    double? discountPercentage,
+    double? discountedTotal,
+    String? thumbnail,
+  }) {
+    return CartProduct(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      price: price ?? this.price,
+      quantity: quantity ?? this.quantity,
+      total: total ?? this.total,
+      discountPercentage: discountPercentage ?? this.discountPercentage,
+      discountedTotal: discountedTotal ?? this.discountedTotal,
+      thumbnail: thumbnail ?? this.thumbnail,
+    );
+  }
 
   factory CartProduct.fromJson(Map<String, dynamic> json) {
     return CartProduct(

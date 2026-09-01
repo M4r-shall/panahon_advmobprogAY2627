@@ -19,19 +19,101 @@ class _CartScreenState extends State<CartScreen> {
   final CartService _cartService = CartService();
   final ProductService _productService = ProductService();
   final UserService _userService = UserService();
-  late Future<Cart> _cartFuture;
+  Cart? _currentCart;
+  bool _isLoading = true;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
-    // Enhancement 3: Based on the saved user data render the cart by userId
-    _cartFuture = _initCart();
+    _loadCart();
   }
 
-  Future<Cart> _initCart() async {
-    final user = await _userService.getUser();
-    final userId = user.id > 0 ? user.id : 1;
-    return _cartService.getCartByUserId(userId);
+  Future<void> _loadCart() async {
+    try {
+      final user = await _userService.getUser();
+      final userId = user.id > 0 ? user.id : 1;
+      final cart = await _cartService.getCartByUserId(userId);
+      if (mounted) {
+        setState(() {
+          _currentCart = cart;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _incrementQuantity(int productId) {
+    if (_currentCart == null) return;
+    
+    final products = List<CartProduct>.from(_currentCart!.products);
+    final index = products.indexWhere((p) => p.id == productId);
+    if (index != -1) {
+      final p = products[index];
+      final newQuantity = p.quantity + 1;
+      final newTotal = p.price * newQuantity;
+      final newDiscountedTotal = newTotal - (newTotal * (p.discountPercentage / 100));
+      
+      products[index] = p.copyWith(
+        quantity: newQuantity,
+        total: newTotal,
+        discountedTotal: newDiscountedTotal,
+      );
+      _recalculateTotals(products);
+    }
+  }
+
+  void _decrementQuantity(int productId) {
+    if (_currentCart == null) return;
+    
+    final products = List<CartProduct>.from(_currentCart!.products);
+    final index = products.indexWhere((p) => p.id == productId);
+    if (index != -1) {
+      final p = products[index];
+      if (p.quantity > 1) {
+        final newQuantity = p.quantity - 1;
+        final newTotal = p.price * newQuantity;
+        final newDiscountedTotal = newTotal - (newTotal * (p.discountPercentage / 100));
+        
+        products[index] = p.copyWith(
+          quantity: newQuantity,
+          total: newTotal,
+          discountedTotal: newDiscountedTotal,
+        );
+      } else {
+        products.removeAt(index);
+      }
+      _recalculateTotals(products);
+    }
+  }
+
+  void _recalculateTotals(List<CartProduct> updatedProducts) {
+    double total = 0;
+    double discountedTotal = 0;
+    int totalQuantity = 0;
+    
+    for (var p in updatedProducts) {
+      total += p.total;
+      discountedTotal += p.discountedTotal;
+      totalQuantity += p.quantity;
+    }
+    
+    setState(() {
+      _currentCart = _currentCart!.copyWith(
+        products: updatedProducts,
+        total: total,
+        discountedTotal: discountedTotal,
+        totalProducts: updatedProducts.length,
+        totalQuantity: totalQuantity,
+      );
+    });
   }
 
   void _navigateToDetails(int productId) async {
@@ -64,18 +146,15 @@ class _CartScreenState extends State<CartScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Cart>(
-      future: _cartFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (!snapshot.hasData) {
-          return const Center(child: Text('No cart found.'));
-        }
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    } else if (_error != null) {
+      return Center(child: Text('Error: $_error'));
+    } else if (_currentCart == null || _currentCart!.products.isEmpty) {
+      return const Center(child: Text('No items in cart.'));
+    }
 
-        final cart = snapshot.data!;
+    final cart = _currentCart!;
 
         return Column(
           children: [
@@ -144,17 +223,20 @@ class _CartScreenState extends State<CartScreen> {
                             ),
                             Column(
                               children: [
-                                Container(
-                                  width: 28.w,
-                                  height: 28.w,
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.primary,
-                                    borderRadius: BorderRadius.circular(8.r),
-                                  ),
-                                  child: Icon(
-                                    Icons.add,
-                                    size: 16.sp,
-                                    color: Theme.of(context).colorScheme.onPrimary,
+                                GestureDetector(
+                                  onTap: () => _incrementQuantity(product.id),
+                                  child: Container(
+                                    width: 28.w,
+                                    height: 28.w,
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      borderRadius: BorderRadius.circular(8.r),
+                                    ),
+                                    child: Icon(
+                                      Icons.add,
+                                      size: 16.sp,
+                                      color: Theme.of(context).colorScheme.onPrimary,
+                                    ),
                                   ),
                                 ),
                                 Padding(
@@ -165,17 +247,20 @@ class _CartScreenState extends State<CartScreen> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                Container(
-                                  width: 28.w,
-                                  height: 28.w,
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).scaffoldBackgroundColor,
-                                    borderRadius: BorderRadius.circular(8.r),
-                                  ),
-                                  child: Icon(
-                                    Icons.remove,
-                                    size: 16.sp,
-                                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                                GestureDetector(
+                                  onTap: () => _decrementQuantity(product.id),
+                                  child: Container(
+                                    width: 28.w,
+                                    height: 28.w,
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).scaffoldBackgroundColor,
+                                      borderRadius: BorderRadius.circular(8.r),
+                                    ),
+                                    child: Icon(
+                                      Icons.remove,
+                                      size: 16.sp,
+                                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -271,7 +356,5 @@ class _CartScreenState extends State<CartScreen> {
             ),
           ],
         );
-      },
-    );
   }
 }
