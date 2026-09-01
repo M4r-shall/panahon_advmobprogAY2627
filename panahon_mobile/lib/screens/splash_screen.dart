@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../services/user_service.dart';
+import '../widgets/custom_text.dart';
 
 // Enhancement 1: Created own UI for splash_screen implementing persistent authentication.
 class SplashScreen extends StatefulWidget {
