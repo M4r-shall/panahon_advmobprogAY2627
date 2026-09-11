@@ -4,7 +4,7 @@ import '../models/user.dart';
 import '../services/user_service.dart';
 import '../widgets/custom_text.dart';
 
-// Enhancement 3: Created own UI for profile_screen to render user data.
+// Created own UI for profile_screen to render user data.
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -70,12 +70,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       CircleAvatar(
                         radius: 40.r,
-                        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                        backgroundColor: Theme.of(
+                          context,
+                        ).scaffoldBackgroundColor,
                         backgroundImage: user.image.isNotEmpty
                             ? NetworkImage(user.image)
                             : null,
                         child: user.image.isEmpty
-                            ? Icon(Icons.person, size: 40.sp, color: Theme.of(context).hintColor)
+                            ? Icon(
+                                Icons.person,
+                                size: 40.sp,
+                                color: Theme.of(context).hintColor,
+                              )
                             : null,
                       ),
                       SizedBox(height: 16.h),
@@ -112,11 +118,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   child: Column(
                     children: [
-                      _buildInfoTile(context, Icons.email_outlined, 'Email', user.email),
-                      Divider(height: 1, color: Theme.of(context).scaffoldBackgroundColor),
-                      _buildInfoTile(context, Icons.people_alt_outlined, 'Gender', user.gender.toLowerCase()),
-                      Divider(height: 1, color: Theme.of(context).scaffoldBackgroundColor),
-                      _buildInfoTile(context, Icons.badge_outlined, 'User ID', '#${user.id}'),
+                      _buildInfoTile(
+                        context,
+                        Icons.email_outlined,
+                        'Email',
+                        user.email,
+                      ),
+                      Divider(
+                        height: 1,
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                      ),
+                      _buildInfoTile(
+                        context,
+                        Icons.people_alt_outlined,
+                        'Gender',
+                        user.gender.toLowerCase(),
+                      ),
+                      Divider(
+                        height: 1,
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                      ),
+                      _buildInfoTile(
+                        context,
+                        Icons.badge_outlined,
+                        'User ID',
+                        '#${user.id}',
+                      ),
                     ],
                   ),
                 ),
@@ -126,8 +153,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   height: 50.h,
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                      side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
+                      backgroundColor: Theme.of(
+                        context,
+                      ).scaffoldBackgroundColor,
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 1.5,
+                      ),
                       foregroundColor: Theme.of(context).hintColor,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
@@ -152,7 +184,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildInfoTile(BuildContext context, IconData icon, String title, String subtitle) {
+  Widget _buildInfoTile(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String subtitle,
+  ) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
       child: Row(

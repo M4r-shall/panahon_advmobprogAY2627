@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../services/user_service.dart';
 import '../widgets/custom_text.dart';
 
-// Enhancement 2: Created own UI for signin_screen implementing user_service and authentication logic.
+// Created own UI for signin screen implementing user service and authentication logic.
 class SigninScreen extends StatefulWidget {
   const SigninScreen({super.key});
 
@@ -92,25 +92,36 @@ class _SigninScreenState extends State<SigninScreen> {
                 SizedBox(height: 48.h),
                 TextFormField(
                   controller: _usernameController,
-                  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                  ),
                   decoration: InputDecoration(
                     labelText: 'Username',
                     labelStyle: TextStyle(color: Theme.of(context).hintColor),
                     floatingLabelBehavior: FloatingLabelBehavior.always,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 16.h,
+                    ),
                     filled: true,
                     fillColor: Theme.of(context).cardColor,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
-                      borderSide: BorderSide(color: Theme.of(context).cardColor),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).cardColor,
+                      ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
-                      borderSide: BorderSide(color: Theme.of(context).cardColor),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).cardColor,
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
-                      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                     errorBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
@@ -132,25 +143,36 @@ class _SigninScreenState extends State<SigninScreen> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: true,
-                  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                  ),
                   decoration: InputDecoration(
                     labelText: 'Password',
                     labelStyle: TextStyle(color: Theme.of(context).hintColor),
                     floatingLabelBehavior: FloatingLabelBehavior.always,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 16.h,
+                    ),
                     filled: true,
                     fillColor: Theme.of(context).cardColor,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
-                      borderSide: BorderSide(color: Theme.of(context).cardColor),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).cardColor,
+                      ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
-                      borderSide: BorderSide(color: Theme.of(context).cardColor),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).cardColor,
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
-                      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                     errorBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),

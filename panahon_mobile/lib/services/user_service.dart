@@ -8,7 +8,10 @@ import '../models/user.dart';
 class UserService {
   Map<String, dynamic> data = {};
 
-  Future<Map<String, dynamic>> loginUser(String username, String password) async {
+  Future<Map<String, dynamic>> loginUser(
+    String username,
+    String password,
+  ) async {
     final response = await post(
       Uri.parse('$host/auth/login'),
       headers: {'Content-Type': 'application/json'},

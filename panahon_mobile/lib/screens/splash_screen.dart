@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../services/user_service.dart';
 import '../widgets/custom_text.dart';
 
-// Enhancement 1: Created own UI for splash_screen implementing persistent authentication.
+//Created own UI for splash_screen implementing persistent authentication.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -30,11 +30,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (loggedIn) {
       final userData = await _userService.getUserData();
       if (!mounted) return;
-      Navigator.pushReplacementNamed(
-        context,
-        '/home',
-        arguments: userData,
-      );
+      Navigator.pushReplacementNamed(context, '/home', arguments: userData);
     } else {
       Navigator.pushReplacementNamed(context, '/signin');
     }
@@ -49,10 +45,7 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Spacer(),
-            Image.asset(
-              'assets/images/nubdexchange_logo.png',
-              width: 120.w,
-            ),
+            Image.asset('assets/images/nubdexchange_logo.png', width: 120.w),
             SizedBox(height: 16.h),
             Text(
               'NUBD Exchange',
