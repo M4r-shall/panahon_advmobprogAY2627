@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -5,6 +7,9 @@ import 'product_screen.dart';
 import 'cart_screen.dart';
 import 'profile_screen.dart';
 
+import '../constants.dart';
+import '../models/login_type.dart';
+import '../services/user_service.dart';
 import '../widgets/custom_text.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -18,11 +23,49 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   final PageController _pageController = PageController();
+  StreamSubscription<void>? _tokenSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _listenForTokenRefresh();
+  }
+
+  /// Firebase rotates the ID token about once an hour while the app is open.
+  /// Mirror each rotation into SharedPreferences so getUserData()['token']
+  /// stays valid for as long as the home screen is alive.
+  Future<void> _listenForTokenRefresh() async {
+    if (!firebaseReady) return;
+    final service = userService.value;
+    if (await service.getLoginType() != LoginType.firebase) return;
+    if (!mounted) return;
+
+    _tokenSubscription = service.idTokenChanges.listen((user) async {
+      if (user == null) return; // signed out: logout() already cleared prefs
+      try {
+        await service.refreshFirebaseToken();
+      } catch (e) {
+        debugPrint('Token mirror failed: $e');
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _tokenSubscription?.cancel();
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final Map<String, dynamic>? args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    final String firstName = args?['firstName'] ?? 'Profile';
+    // Firebase users may have no stored first name; fall back to the username
+    // rather than showing an empty title on the Profile tab.
+    final String firstName = _firstNonEmpty([
+      args?['firstName'] as String?,
+      args?['username'] as String?,
+    ]) ?? 'Profile';
 
     return PopScope(
       canPop: false,
@@ -96,6 +139,13 @@ class _HomeScreenState extends State<HomeScreen> {
             : null,
       ),
     );
+  }
+
+  String? _firstNonEmpty(List<String?> candidates) {
+    for (final candidate in candidates) {
+      if (candidate != null && candidate.trim().isNotEmpty) return candidate;
+    }
+    return null;
   }
 
   void _onTappedBar(int value) {

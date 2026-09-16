@@ -18,7 +18,9 @@ class CartScreen extends StatefulWidget {
 class _CartScreenState extends State<CartScreen> {
   final CartService _cartService = CartService();
   final ProductService _productService = ProductService();
-  final UserService _userService = UserService();
+  // Shared instance rather than a private one, so every screen sees the same
+  // session state.
+  final UserService _userService = userService.value;
   Cart? _currentCart;
   bool _isLoading = true;
   String? _error;
