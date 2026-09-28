@@ -16,17 +16,16 @@ class CartService {
     }
   }
 
-  Future<Cart> getCartByUserId(int userId) async {
+  /// Null when the user simply has no cart. An empty cart is a normal state,
+  /// not a failure: throwing here made the cart screen render
+  /// "Error: Exception: User has no carts" instead of its empty view.
+  Future<Cart?> getCartByUserId(int userId) async {
     final response = await http.get(Uri.parse('$host/carts/user/$userId'));
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = jsonDecode(response.body);
       final List cartsJson = data['carts'] ?? [];
-      if (cartsJson.isNotEmpty) {
-        return Cart.fromJson(cartsJson.first);
-      } else {
-        throw Exception('User has no carts');
-      }
+      return cartsJson.isNotEmpty ? Cart.fromJson(cartsJson.first) : null;
     } else {
       throw Exception('Failed to load user cart');
     }

@@ -1,16 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import '../models/login_type.dart';
+import '../providers/user_provider.dart';
 import '../services/user_service.dart';
 import '../widgets/custom_text.dart';
 import '../widgets/custom_text_field.dart';
 
-// Created own UI for profile_screen to render user data.
-//
-// Reads the normalised map from UserService.getUserData() so the same widget
-// renders a DummyJSON session and a Firebase session, and exposes the account
-// actions each backend actually supports.
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -19,24 +16,14 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  // Shared instance rather than a private one, so every screen sees the same
-  // session state.
   final UserService _userService = userService.value;
-  late Future<Map<String, dynamic>> _userDataFuture;
 
-  @override
-  void initState() {
-    super.initState();
-    _userDataFuture = _userService.getUserData();
-  }
-
-  void _refresh() {
-    setState(() => _userDataFuture = _userService.getUserData());
-  }
+  Future<void> _refresh() => context.read<UserProvider>().load();
 
   void _logout() async {
     await _userService.logout();
     if (!mounted) return;
+    context.read<UserProvider>().clear();
     Navigator.pushNamedAndRemoveUntil(context, '/signin', (route) => false);
   }
 
@@ -65,7 +52,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   // --- Account actions ------------------------------------------------------
 
-  Future<void> _updateUsername(Map<String, dynamic> data, LoginType type) async {
+  Future<void> _updateUsername(
+    Map<String, dynamic> data,
+    LoginType type,
+  ) async {
     final controller = TextEditingController(
       text: data['username'] as String? ?? '',
     );
@@ -128,7 +118,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           'persist the change.',
         );
       }
-      _refresh();
+      if (!mounted) return;
+      await _refresh();
     } on FirebaseAuthException catch (e) {
       _showMessage(_firebaseErrorMessage(e));
     } catch (e) {
@@ -160,8 +151,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   controller: currentController,
                   label: 'Current Password',
                   obscureText: true,
-                  validator: (value) =>
-                      (value == null || value.isEmpty)
+                  validator: (value) => (value == null || value.isEmpty)
                       ? 'Please enter your current password'
                       : null,
                 ),
@@ -350,7 +340,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final result = await _userService.deleteAccountDummyJson(
         id: data['id'] as int,
       );
-      _showMessage('Server replied isDeleted: ${result['isDeleted']} (simulated).');
+      _showMessage(
+        'Server replied isDeleted: ${result['isDeleted']} (simulated).',
+      );
       await _userService.logout();
       if (!mounted) return;
       Navigator.pushNamedAndRemoveUntil(context, '/signin', (route) => false);
@@ -383,20 +375,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Map<String, dynamic>>(
-      future: _userDataFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+    // Consumer rather than a one-shot Future: an account action anywhere in
+    // the app rebuilds this screen as soon as the provider reloads.
+    return Consumer<UserProvider>(
+      builder: (context, userProvider, _) {
+        if (userProvider.isLoading) {
           return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (!snapshot.hasData) {
+        }
+
+        final data = userProvider.data;
+        if (data.isEmpty) {
           return const Center(child: Text('No user data found.'));
         }
 
-        final data = snapshot.data!;
-        final loginType = LoginType.fromKey(data['loginType'] as String?);
-        final isFirebase = loginType == LoginType.firebase;
+        final loginType = userProvider.loginType;
+        final isFirebase = userProvider.isFirebase;
 
         final image = data['image'] as String? ?? '';
         final firstName = data['firstName'] as String? ?? '';
@@ -439,6 +432,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             : null,
                       ),
                       SizedBox(height: 16.h),
+                      _caption(context, 'Name'),
+                      SizedBox(height: 2.h),
                       CustomText(
                         text: '$firstName $lastName'.trim().isEmpty
                             ? username
@@ -447,7 +442,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).textTheme.bodyMedium?.color,
                       ),
-                      SizedBox(height: 4.h),
+                      SizedBox(height: 10.h),
+                      _caption(context, 'Username'),
+                      SizedBox(height: 2.h),
                       CustomText(
                         text: '@$username',
                         fontSize: 14.sp,
@@ -540,9 +537,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         context,
                         icon: Icons.edit_outlined,
                         title: 'Update Username',
+                        // Says which of the two fields on the card it edits:
+                        // changing the handle leaving the name alone reads as
+                        // a failed update otherwise.
                         subtitle: isFirebase
-                            ? 'Changes your Firebase display name'
-                            : 'Simulated on DummyJSON',
+                            ? 'Changes your username'
+                            : 'Changes your username',
                         onTap: () => _updateUsername(data, loginType),
                       ),
                       _divider(context),
@@ -631,9 +631,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _divider(BuildContext context) {
-    return Divider(
-      height: 1,
-      color: Theme.of(context).scaffoldBackgroundColor,
+    return Divider(height: 1, color: Theme.of(context).scaffoldBackgroundColor);
+  }
+
+  /// Small grey label above a value on the profile card.
+  ///
+  /// The card shows two different fields — the full name from signup and the
+  /// username — and without captions they read as one identity, so editing the
+  /// username looked like it had failed to change the name above it.
+  /// Deliberately styled like the labels `_buildInfoTile` already uses, so the
+  /// profile card and the info card below it read the same way.
+  Widget _caption(BuildContext context, String text) {
+    return CustomText(
+      text: text,
+      fontSize: 11.sp,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.5,
+      color: Theme.of(context).hintColor,
     );
   }
 
@@ -727,7 +741,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       subtitle: CustomText(
         text: subtitle,
         fontSize: 12.sp,
-        maxLines: 2,
+        // 3, not 2: the Update Username subtitle needs the room to say which
+        // field it edits. A cap, so the shorter subtitles are unaffected.
+        maxLines: 3,
         color: Theme.of(context).hintColor,
       ),
       trailing: Icon(

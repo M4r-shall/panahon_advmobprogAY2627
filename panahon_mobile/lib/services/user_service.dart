@@ -233,15 +233,105 @@ class UserService {
     }
   }
 
+  /// Key for a profile field kept outside the session keys, scoped to one
+  /// Firebase account. These survive _clearSessionKeys() on purpose: see
+  /// saveSignupProfile().
+  String _profileKey(String uid, String field) => 'profile_${uid}_$field';
+
+  /// The four fields collected at signup that have no Firebase equivalent.
+  static const List<String> _profileFields = [
+    'firstName',
+    'lastName',
+    'age',
+    'contactNo',
+  ];
+
   /// Persist the extra profile fields collected at signup. Firebase only stores
   /// displayName/email/photoURL, so age, contact number and the real first/last
   /// name have nowhere else to live.
+  ///
+  /// They are written twice: into the session keys the profile screen reads,
+  /// and into uid-scoped keys that survive logout. Without the second copy,
+  /// signIn() clears the session keys and the next sign-in has nothing to
+  /// restore, so Age and Contact No. disappear and firstName silently becomes
+  /// the username (saveFirebaseUserData falls back to splitting displayName).
   Future<void> saveSignupProfile(SignupRequest request) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('firstName', request.fName);
     await prefs.setString('lastName', request.lName);
     await prefs.setInt('age', request.age);
     await prefs.setString('contactNo', request.contactNo);
+
+    // createAccount() signs the user in, so by the time signup_screen calls
+    // this the uid exists. A DummyJSON signup has no uid and needs no copy:
+    // that backend re-sends these fields on every login.
+    final uid = firebaseReady ? firebaseAuth.currentUser?.uid : null;
+    if (uid == null || uid.isEmpty) return;
+
+    await prefs.setString(_profileKey(uid, 'firstName'), request.fName);
+    await prefs.setString(_profileKey(uid, 'lastName'), request.lName);
+    await prefs.setInt(_profileKey(uid, 'age'), request.age);
+    await prefs.setString(_profileKey(uid, 'contactNo'), request.contactNo);
+  }
+
+  /// Copy a Firebase account's stored signup profile back into the session
+  /// keys. Returns true when a first name was restored, which tells
+  /// saveFirebaseUserData it can skip the displayName fallback.
+  Future<bool> _restoreProfileForUid(String uid) async {
+    final prefs = await SharedPreferences.getInstance();
+    final firstName = prefs.getString(_profileKey(uid, 'firstName')) ?? '';
+    if (firstName.isEmpty) return false;
+
+    await prefs.setString('firstName', firstName);
+    await prefs.setString(
+      'lastName',
+      prefs.getString(_profileKey(uid, 'lastName')) ?? '',
+    );
+
+    final age = prefs.getInt(_profileKey(uid, 'age'));
+    if (age != null) await prefs.setInt('age', age);
+
+    final contactNo = prefs.getString(_profileKey(uid, 'contactNo'));
+    if (contactNo != null) await prefs.setString('contactNo', contactNo);
+
+    return true;
+  }
+
+  /// Copy the live session's profile fields into the uid-scoped keys, but only
+  /// when nothing is stored for that account yet. Never overwrites a stored
+  /// profile, so it cannot clobber a real first name with one derived from a
+  /// display name.
+  Future<void> _seedProfileForUid(String uid) async {
+    final prefs = await SharedPreferences.getInstance();
+    if ((prefs.getString(_profileKey(uid, 'firstName')) ?? '').isNotEmpty) {
+      return;
+    }
+
+    final firstName = prefs.getString('firstName') ?? '';
+    if (firstName.isEmpty) return;
+
+    await prefs.setString(_profileKey(uid, 'firstName'), firstName);
+    await prefs.setString(
+      _profileKey(uid, 'lastName'),
+      prefs.getString('lastName') ?? '',
+    );
+
+    final age = prefs.getInt('age');
+    if (age != null) await prefs.setInt(_profileKey(uid, 'age'), age);
+
+    final contactNo = prefs.getString('contactNo');
+    if (contactNo != null) {
+      await prefs.setString(_profileKey(uid, 'contactNo'), contactNo);
+    }
+  }
+
+  /// Drop the stored profile for one account, so a deleted account leaves
+  /// nothing behind on the device.
+  Future<void> _clearProfileForUid(String uid) async {
+    final prefs = await SharedPreferences.getInstance();
+    for (final field in _profileFields) {
+      await prefs.remove(_profileKey(uid, field));
+    }
   }
 
   /// Map a Firebase user onto the same SharedPreferences keys the DummyJSON
@@ -268,15 +358,25 @@ class UserService {
     );
     await prefs.setString('email', email);
 
-    // Keep the names captured at signup; only fall back to splitting the
-    // display name when we have nothing better.
+    // Keep the names captured at signup. signIn() has just cleared the session
+    // keys, so restore this account's stored profile first and only fall back
+    // to splitting the display name when there is nothing to restore (an
+    // account created outside this app, for example).
     if ((prefs.getString('firstName') ?? '').isEmpty) {
-      final parts = displayName.trim().split(RegExp(r'\s+'));
-      await prefs.setString('firstName', parts.isNotEmpty ? parts.first : '');
-      await prefs.setString(
-        'lastName',
-        parts.length > 1 ? parts.sublist(1).join(' ') : '',
-      );
+      final restored = await _restoreProfileForUid(firebaseUser.uid);
+      if (!restored) {
+        final parts = displayName.trim().split(RegExp(r'\s+'));
+        await prefs.setString('firstName', parts.isNotEmpty ? parts.first : '');
+        await prefs.setString(
+          'lastName',
+          parts.length > 1 ? parts.sublist(1).join(' ') : '',
+        );
+      }
+    } else {
+      // A live session with no stored copy yet: an account that signed up
+      // before the uid-scoped keys existed. Seed them now so this account
+      // survives its next sign-in too, instead of having to sign up again.
+      await _seedProfileForUid(firebaseUser.uid);
     }
 
     await prefs.setString('gender', '');
@@ -371,6 +471,10 @@ class UserService {
     } catch (_) {
       // Ignored on purpose, see above.
     }
+
+    // Otherwise the previous user's raw login response lingers in this
+    // process-wide singleton for the life of the app.
+    data = {};
 
     try {
       await _clearSessionKeys();
@@ -483,6 +587,7 @@ class UserService {
     required String password,
   }) async {
     final user = _requireUser();
+    final uid = user.uid;
     AuthCredential credential = EmailAuthProvider.credential(
       email: email,
       password: password,
@@ -491,6 +596,9 @@ class UserService {
     // Firebase requires a recent login before destructive operations.
     await user.reauthenticateWithCredential(credential);
     await user.delete();
+    // The uid-scoped profile outlives the session keys, so deleting the
+    // account has to remove it explicitly.
+    await _clearProfileForUid(uid);
     await firebaseAuth.signOut();
   }
 

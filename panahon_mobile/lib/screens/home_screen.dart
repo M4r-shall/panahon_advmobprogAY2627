@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
 import 'product_screen.dart';
 import 'cart_screen.dart';
@@ -9,12 +10,12 @@ import 'profile_screen.dart';
 
 import '../constants.dart';
 import '../models/login_type.dart';
+import '../providers/user_provider.dart';
 import '../services/user_service.dart';
 import '../widgets/custom_text.dart';
 
 class HomeScreen extends StatefulWidget {
-  final String username;
-  const HomeScreen({super.key, this.username = ''});
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -59,13 +60,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, dynamic>? args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    // Firebase users may have no stored first name; fall back to the username
-    // rather than showing an empty title on the Profile tab.
-    final String firstName = _firstNonEmpty([
-      args?['firstName'] as String?,
-      args?['username'] as String?,
-    ]) ?? 'Profile';
+    // Watched, not read from route arguments: those were a snapshot taken at
+    // login, so an account change never reached this title until the next
+    // sign-in. UserProvider.displayName already falls back to the username for
+    // a Firebase account with no stored first name.
+    final user = context.watch<UserProvider>();
+    final String title = user.displayName.isEmpty ? 'Profile' : user.displayName;
 
     return PopScope(
       canPop: false,
@@ -81,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   text: (_selectedIndex == 1)
                       ? 'Cart'
                       : (_selectedIndex == 2)
-                      ? firstName
+                      ? title
                       : 'Home',
                   fontSize: 20.sp,
                   fontWeight: FontWeight.w600,
@@ -139,13 +139,6 @@ class _HomeScreenState extends State<HomeScreen> {
             : null,
       ),
     );
-  }
-
-  String? _firstNonEmpty(List<String?> candidates) {
-    for (final candidate in candidates) {
-      if (candidate != null && candidate.trim().isNotEmpty) return candidate;
-    }
-    return null;
   }
 
   void _onTappedBar(int value) {

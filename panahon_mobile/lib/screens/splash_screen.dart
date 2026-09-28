@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import '../constants.dart';
 import '../models/login_type.dart';
+import '../providers/user_provider.dart';
 import '../services/user_service.dart';
 import '../widgets/custom_text.dart';
 
@@ -67,9 +69,11 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     if (loggedIn) {
-      final userData = await _userService.getUserData();
+      // Load the session into the provider before navigating: /home reads the
+      // user from there, not from route arguments.
+      await context.read<UserProvider>().load();
       if (!mounted) return;
-      Navigator.pushReplacementNamed(context, '/home', arguments: userData);
+      Navigator.pushReplacementNamed(context, '/home');
     } else {
       Navigator.pushReplacementNamed(context, '/signin');
     }

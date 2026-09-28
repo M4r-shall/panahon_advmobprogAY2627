@@ -2,9 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import '../constants.dart';
 import '../models/login_type.dart';
 import '../models/signup_request.dart';
+import '../providers/user_provider.dart';
 import '../services/user_service.dart';
 import '../widgets/custom_text.dart';
 import '../widgets/custom_text_field.dart';
@@ -180,10 +182,11 @@ class _SignupScreenState extends State<SignupScreen> {
         await service.saveFirebaseUserData(service.currentUser!);
 
         // createUserWithEmailAndPassword signs the user in automatically.
-        final userData = await service.getUserData();
+        if (!mounted) return;
+        await context.read<UserProvider>().load();
         if (!mounted) return;
         setState(() => _isLoading = false);
-        Navigator.pushReplacementNamed(context, '/home', arguments: userData);
+        Navigator.pushReplacementNamed(context, '/home');
       } else {
         final created = await service.createAccountDummyJson(request);
         if (!mounted) return;

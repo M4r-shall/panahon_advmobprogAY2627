@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/login_type.dart';
 import '../providers/theme_provider.dart';
+import '../providers/user_provider.dart';
 import '../services/user_service.dart';
 
 // Add settings page to move the dark/light mode switch.
@@ -34,6 +35,7 @@ class SettingsScreen extends StatelessWidget {
     await userService.value.logout();
 
     if (!context.mounted) return;
+    context.read<UserProvider>().clear();
     // Settings is pushed on top of /home, and HomeScreen blocks pops with
     // PopScope. Replacing only this route would leave the signed-in home
     // screen alive underneath, so the whole stack has to go.

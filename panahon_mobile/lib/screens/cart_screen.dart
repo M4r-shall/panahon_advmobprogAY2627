@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/cart.dart';
+import '../models/login_type.dart';
 import '../services/cart_service.dart';
 import '../services/product_service.dart';
 import '../services/user_service.dart';
@@ -24,6 +25,7 @@ class _CartScreenState extends State<CartScreen> {
   Cart? _currentCart;
   bool _isLoading = true;
   String? _error;
+  LoginType _loginType = LoginType.dummyJson;
 
   @override
   void initState() {
@@ -33,9 +35,34 @@ class _CartScreenState extends State<CartScreen> {
 
   Future<void> _loadCart() async {
     try {
+      final type = await _userService.getLoginType();
+      if (!mounted) return;
+      setState(() => _loginType = type);
+
+      // Carts live on DummyJSON and are keyed by its integer user id. A
+      // Firebase account has no such id (saveFirebaseUserData stores 0,
+      // because the real identity is the string uid), so there is nothing to
+      // fetch. This used to fall back to userId 1 and show a Firebase user
+      // DummyJSON user #1's cart.
+      if (type == LoginType.firebase) {
+        setState(() {
+          _currentCart = null;
+          _isLoading = false;
+        });
+        return;
+      }
+
       final user = await _userService.getUser();
-      final userId = user.id > 0 ? user.id : 1;
-      final cart = await _cartService.getCartByUserId(userId);
+      if (user.id <= 0) {
+        if (!mounted) return;
+        setState(() {
+          _currentCart = null;
+          _isLoading = false;
+        });
+        return;
+      }
+
+      final cart = await _cartService.getCartByUserId(user.id);
       if (mounted) {
         setState(() {
           _currentCart = cart;
@@ -118,6 +145,49 @@ class _CartScreenState extends State<CartScreen> {
     });
   }
 
+  /// The empty view explains itself rather than leaving a Firebase user
+  /// wondering why their cart is always empty, the same way ProfileScreen
+  /// explains the actions DummyJSON cannot support.
+  Widget _buildEmptyCart(BuildContext context) {
+    final isFirebase = _loginType == LoginType.firebase;
+
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 32.w),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.shopping_cart_outlined,
+              size: 56.sp,
+              color: Theme.of(context).hintColor,
+            ),
+            SizedBox(height: 16.h),
+            CustomText(
+              text: 'No items in cart.',
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).textTheme.bodyMedium?.color,
+            ),
+            if (isFirebase) ...[
+              SizedBox(height: 8.h),
+              CustomText(
+                text:
+                    'Carts come from the DummyJSON backend and are keyed by its '
+                    'user id. A Firebase account has no cart on that server, so '
+                    'this stays empty. Sign in with DummyJSON to see one.',
+                fontSize: 12.sp,
+                maxLines: 5,
+                textAlign: TextAlign.center,
+                color: Theme.of(context).hintColor,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
   void _navigateToDetails(int productId) async {
     // Show a loading indicator while fetching full product details
     showDialog(
@@ -153,7 +223,7 @@ class _CartScreenState extends State<CartScreen> {
     } else if (_error != null) {
       return Center(child: Text('Error: $_error'));
     } else if (_currentCart == null || _currentCart!.products.isEmpty) {
-      return const Center(child: Text('No items in cart.'));
+      return _buildEmptyCart(context);
     }
 
     final cart = _currentCart!;

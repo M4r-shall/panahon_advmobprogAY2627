@@ -1,15 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../models/login_type.dart';
 import '../models/product_model.dart';
 import '../widgets/custom_text.dart';
 
 import '../services/cart_service.dart';
+import '../services/user_service.dart';
 
 //Add details page when clicked the card.
 class ProductDetailsScreen extends StatelessWidget {
   final Product product;
 
   const ProductDetailsScreen({super.key, required this.product});
+
+  /// Posts to the signed-in DummyJSON user's cart. This used to be a hardcoded
+  /// userId 33, so every "Add to Cart" went to the same stranger's cart no
+  /// matter who was signed in.
+  Future<void> _addToCart(BuildContext context) async {
+    final service = userService.value;
+
+    try {
+      final loginType = await service.getLoginType();
+      if (!context.mounted) return;
+
+      // DummyJSON owns carts, and it keys them by an integer user id a
+      // Firebase account does not have. See CartScreen's empty state.
+      if (loginType == LoginType.firebase) {
+        _showMessage(
+          context,
+          'The cart is a DummyJSON feature. Sign in with DummyJSON to add '
+          'items.',
+        );
+        return;
+      }
+
+      final user = await service.getUser();
+      if (!context.mounted) return;
+      if (user.id <= 0) {
+        _showMessage(context, 'Sign in again to add items to your cart.');
+        return;
+      }
+
+      await CartService().addToCart(user.id, product.id, 1);
+      if (!context.mounted) return;
+      _showMessage(context, '${product.title} added to cart!');
+    } catch (e) {
+      if (!context.mounted) return;
+      _showMessage(context, 'Failed to add to cart: $e');
+    }
+  }
+
+  void _showMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,29 +127,7 @@ class ProductDetailsScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12.r),
                         ),
                       ),
-                      onPressed: () async {
-                        try {
-                          final cartService = CartService();
-                          await cartService.addToCart(33, product.id, 1);
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  '${product.title} added to cart!',
-                                ),
-                              ),
-                            );
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Failed to add to cart: $e'),
-                              ),
-                            );
-                          }
-                        }
-                      },
+                      onPressed: () => _addToCart(context),
                       child: CustomText(
                         text: 'Add to Cart',
                         fontSize: 16.sp,

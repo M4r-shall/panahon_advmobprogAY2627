@@ -15,6 +15,7 @@ import 'screens/signin_screen.dart';
 
 // providers
 import 'providers/theme_provider.dart';
+import 'providers/user_provider.dart';
 
 // constants
 import 'constants.dart';
@@ -48,8 +49,13 @@ class RoblesAdvMobProg extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ThemeProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        // Sits above the navigator so the signed-in user survives route
+        // changes; the splash screen loads it before pushing /home.
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+      ],
       child: ScreenUtilInit(
         designSize: const Size(412, 715),
         minTextAdapt: true,
