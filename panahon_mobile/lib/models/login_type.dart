@@ -13,8 +13,7 @@ enum LoginType {
   /// Human readable name shown in the UI.
   final String label;
 
-  /// Falls back to DummyJSON so an existing session (saved before this key
-  /// existed) keeps working instead of being bounced back to sign in.
+  /// Falls back to DummyJSON so an existing session
   static LoginType fromKey(String? key) => LoginType.values.firstWhere(
     (type) => type.key == key,
     orElse: () => LoginType.dummyJson,
