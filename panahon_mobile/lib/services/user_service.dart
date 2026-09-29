@@ -10,6 +10,7 @@ import '../models/signup_request.dart';
 // under a prefix. Rule for this file: a bare `User` is the Firebase one,
 // `models.User` is ours.
 import '../models/user.dart' as models;
+import 'chat_service.dart';
 
 /// Single shared UserService for the whole app. Screens read `userService.value`
 /// instead of constructing their own instance, so there is exactly one seam
@@ -387,6 +388,23 @@ class UserService {
     await prefs.setBool('emailVerified', firebaseUser.emailVerified);
 
     await saveLoginType(LoginType.firebase);
+
+    // Mirror the account into Firestore so it appears in the chat list. This
+    // runs on signup and on every sign-in, which is what backfills accounts
+    // created before the Users collection existed. A Firestore failure must
+    // never block a login that has otherwise succeeded, so it only logs.
+    try {
+      await ChatService().upsertUser(
+        uid: firebaseUser.uid,
+        email: email,
+        username: prefs.getString('username') ?? '',
+        firstName: prefs.getString('firstName') ?? '',
+        lastName: prefs.getString('lastName') ?? '',
+        image: firebaseUser.photoURL ?? '',
+      );
+    } catch (e) {
+      debugPrint('Could not sync user to Firestore: $e');
+    }
   }
 
   /// Retrieve user data from SharedPreferences

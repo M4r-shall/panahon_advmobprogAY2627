@@ -132,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
         // When in the cart screen the FloatingActionButton must be hidden.
         floatingActionButton: _selectedIndex != 1
             ? FloatingActionButton(
-                onPressed: () {},
+                onPressed: () => Navigator.pushNamed(context, '/chat'),
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 child: Icon(Icons.chat, color: Theme.of(context).colorScheme.onPrimary),
               )
